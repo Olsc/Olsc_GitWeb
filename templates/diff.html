@@ -3,14 +3,13 @@
 {% block title %}{{ commit_hash[:7] }} · {{ repo_name }}{% endblock %}
 
 {% block content %}
-<div
-    style="margin-bottom: 16px; background: var(--color-canvas-subtle); padding: 16px; border: 1px solid var(--color-border-default); border-radius: 6px;">
-    <div style="font-size: 18px; font-weight: 500; margin-bottom: 8px;">
+<div class="diff-header-container">
+    <div class="diff-title">
         仓库更新内容
-        <span style="font-weight: 400; color: var(--color-fg-muted);">#{{ commit_hash[:7] }}</span>
+        <span class="diff-commit-hash">#{{ commit_hash[:7] }}</span>
     </div>
-    <div style="font-size: 13px; color: var(--color-fg-muted);">
-        <span style="font-weight: 600; color: var(--color-fg-default);">Olsc</span> 提交于不久前
+    <div class="diff-meta">
+        <span class="diff-author">Olsc</span> 提交于不久前
     </div>
 </div>
 
@@ -24,27 +23,21 @@
 </div>
 
 <script>
-    // Parse and colorize diff
+    
     const diffText = {{ diff| tojson }};
     const lines = diffText.split('\n');
     let html = '';
 
     lines.forEach(line => {
-        let lineClass = '';
-        let bgColor = '';
-        let textColor = '';
-
+        let lineClass = 'diff-line';
         if (line.startsWith('+')) {
-            bgColor = 'rgba(46, 160, 67, 0.15)';
-            textColor = '#3fb950';
+            lineClass += ' diff-line-add';
         } else if (line.startsWith('-')) {
-            bgColor = 'rgba(248, 81, 73, 0.15)';
-            textColor = '#f85149';
+            lineClass += ' diff-line-del';
         } else if (line.startsWith('@@')) {
-            bgColor = 'rgba(56, 139, 253, 0.15)';
-            textColor = '#58a6ff';
+            lineClass += ' diff-line-meta';
         } else if (line.startsWith('diff') || line.startsWith('index') || line.startsWith('---') || line.startsWith('+++')) {
-            textColor = '#8b949e';
+            lineClass += ' diff-line-info';
         }
 
         const escapedLine = line
@@ -53,7 +46,7 @@
             .replace(/>/g, '&gt;')
             .replace(/ /g, '&nbsp;');
 
-        html += `<div style="padding: 0 16px; ${bgColor ? 'background: ' + bgColor + ';' : ''} ${textColor ? 'color: ' + textColor + ';' : ''}">${escapedLine || '&nbsp;'}</div>`;
+        html += `<div class="${lineClass}">${escapedLine || '&nbsp;'}</div>`;
     });
 
     document.getElementById('diff-content').innerHTML = html;

@@ -10,30 +10,26 @@
     </p>
 </div>
 
-<!-- 搜索过滤器 -->
-<div
-    style="margin-bottom: 16px; display: flex; gap: 8px; border-bottom: 1px solid var(--color-border-default); padding-bottom: 8px;">
-    <a href="{{ url_for('search', q=query) }}" class="{% if not filter_type %}selected{% endif %}"
-        style="padding: 8px 16px; border-radius: 6px; text-decoration: none; {% if not filter_type %}background: var(--color-canvas-subtle); font-weight: 600;{% endif %}">
+
+<div class="search-filter-bar">
+    <a href="{{ url_for('search', q=query) }}" class="search-filter-item {% if not filter_type %}selected{% endif %}">
         全部 ({{ total_results }})
     </a>
     <a href="{{ url_for('search', q=query, type='repositories') }}"
-        class="{% if filter_type == 'repositories' %}selected{% endif %}"
-        style="padding: 8px 16px; border-radius: 6px; text-decoration: none; {% if filter_type == 'repositories' %}background: var(--color-canvas-subtle); font-weight: 600;{% endif %}">
+        class="search-filter-item {% if filter_type == 'repositories' %}selected{% endif %}">
         项目 ({{ repo_count }})
     </a>
-    <a href="{{ url_for('search', q=query, type='code') }}" class="{% if filter_type == 'code' %}selected{% endif %}"
-        style="padding: 8px 16px; border-radius: 6px; text-decoration: none; {% if filter_type == 'code' %}background: var(--color-canvas-subtle); font-weight: 600;{% endif %}">
+    <a href="{{ url_for('search', q=query, type='code') }}"
+        class="search-filter-item {% if filter_type == 'code' %}selected{% endif %}">
         代码 ({{ code_count }})
     </a>
     <a href="{{ url_for('search', q=query, type='commits') }}"
-        class="{% if filter_type == 'commits' %}selected{% endif %}"
-        style="padding: 8px 16px; border-radius: 6px; text-decoration: none; {% if filter_type == 'commits' %}background: var(--color-canvas-subtle); font-weight: 600;{% endif %}">
+        class="search-filter-item {% if filter_type == 'commits' %}selected{% endif %}">
         提交 ({{ commit_count }})
     </a>
 </div>
 
-<!-- 仓库结果 -->
+
 {% if repositories and (not filter_type or filter_type == 'repositories') %}
 <div class="Box" style="margin-bottom: 24px;">
     <div class="Box-header">
@@ -64,7 +60,7 @@
 </div>
 {% endif %}
 
-<!-- 代码结果 -->
+
 {% if code_results and (not filter_type or filter_type == 'code') %}
 <div class="Box" style="margin-bottom: 24px;">
     <div class="Box-header">
@@ -93,7 +89,7 @@
 </div>
 {% endif %}
 
-<!-- 提交结果 -->
+
 {% if commits and (not filter_type or filter_type == 'commits') %}
 <div class="Box" style="margin-bottom: 24px;">
     <div class="Box-header">

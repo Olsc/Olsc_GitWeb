@@ -3,49 +3,40 @@
 {% block title %}设置 - {{ repo_name }}{% endblock %}
 
 {% block content %}
-<div class="grid">
-    <div style="display: flex; gap: 24px;">
-        <!-- Settings Sidebar -->
-        <div style="width: 256px; flex-shrink: 0;">
-            <div style="font-weight: 600; color: var(--color-fg-default); margin-bottom: 8px; padding-left: 8px;">设置
-            </div>
-            <nav class="menu" style="display: flex; flex-direction: column;">
-                <a href="#" class="menu-item selected"
-                    style="padding: 8px; border-radius: 6px; background: var(--color-btn-hover-bg); color: var(--color-fg-default); font-weight: 600;">通用</a>
-            </nav>
+<div class="grid settings-layout">
+    <div class="settings-sidebar">
+        <div class="settings-sidebar-title">设置</div>
+        <nav class="settings-menu">
+            <a href="#" class="menu-item selected settings-menu-item">通用</a>
+        </nav>
+    </div>
+
+    
+    <div class="settings-content">
+        <h2 class="settings-page-title">通用设置</h2>
+
+        <div class="settings-form-group">
+            <label class="settings-label">仓库名称</label>
+            <input type="text" value="{{ repo_name }}" disabled class="settings-input">
         </div>
 
-        <!-- Main Settings Content -->
-        <div style="flex-grow: 1;">
-            <h2
-                style="font-size: 24px; font-weight: 400; margin-top: 0; margin-bottom: 16px; border-bottom: 1px solid var(--color-border-default); padding-bottom: 8px;">
-                通用设置</h2>
-
-            <div style="margin-bottom: 24px;">
-                <label style="font-weight: 600; display: block; margin-bottom: 8px;">仓库名称</label>
-                <input type="text" value="{{ repo_name }}" disabled style="width: 300px;">
+        <div class="Box box-danger">
+            <div class="Box-header box-header-danger">
+                危险区域
             </div>
-
-            <div class="Box" style="border-color: var(--color-danger-fg);">
-                <div class="Box-header"
-                    style="background: transparent; border-bottom: 1px solid var(--color-danger-fg); color: var(--color-danger-fg); font-weight: 600;">
-                    危险区域
+            <div class="Box-row box-row-danger">
+                <div>
+                    <div class="danger-title">删除此仓库</div>
+                    <div class="danger-desc">一旦删除，此操作无法撤销。请三思而后行。</div>
                 </div>
-                <div class="Box-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: var(--color-fg-default);">删除此仓库</div>
-                        <div style="font-size: 12px; color: var(--color-fg-muted);">一旦删除，此操作无法撤销。请三思而后行。</div>
-                    </div>
-                    <button onclick="document.getElementById('delete-modal').style.display='flex'"
-                        class="btn btn-danger"
-                        style="background: transparent; color: var(--color-danger-fg); border-color: var(--color-border-default);">删除此仓库</button>
-                </div>
+                <button onclick="document.getElementById('delete-modal').style.display='flex'"
+                    class="btn btn-danger btn-danger-outline">删除此仓库</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Simple Modal -->
+
 <div id="delete-modal"
     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000;">
     <div

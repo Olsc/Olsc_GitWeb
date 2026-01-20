@@ -3,9 +3,9 @@
 {% block title %}{{ repo_name }}{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <div style="display: flex; gap: 8px; align-items: center;">
-        <!-- Branch Selector -->
+<div class="repo-toolbar">
+    <div class="repo-toolbar-left">
+        
         <div style="position: relative; display: inline-block;">
             <button class="btn btn-sm"
                 style="background: var(--color-canvas-subtle); display: flex; align-items: center; gap: 4px;"
@@ -34,8 +34,8 @@
                         <a href="{{ url_for('view_tree', repo_name=repo_name, ref=b, subpath=current_path) }}"
                             class="dropdown-item ref-item"
                             style="padding: 8px 12px; display: block; text-decoration: none; color: var(--color-fg-default); font-size: 13px;">
-                            <i class="fas fa-check"
-                                style="width: 16px; visibility: {% if b == display_ref %}visible{% else %}hidden{% endif %}; color: var(--color-fg-default);"></i>
+                            <i class="fas fa-check ref-check-icon {% if b == display_ref %}visible{% endif %}"
+                                style="width: 16px; color: var(--color-fg-default);"></i>
                             {{ b }}
                         </a>
                         {% endfor %}
@@ -47,8 +47,8 @@
                         <a href="{{ url_for('view_tree', repo_name=repo_name, ref=t, subpath=current_path) }}"
                             class="dropdown-item ref-item"
                             style="padding: 8px 12px; display: block; text-decoration: none; color: var(--color-fg-default); font-size: 13px;">
-                            <i class="fas fa-check"
-                                style="width: 16px; visibility: {% if t == display_ref %}visible{% else %}hidden{% endif %}; color: var(--color-fg-default);"></i>
+                            <i class="fas fa-check ref-check-icon {% if t == display_ref %}visible{% endif %}"
+                                style="width: 16px; color: var(--color-fg-default);"></i>
                             {{ t }}
                         </a>
                         {% endfor %}
@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; font-weight: 600; font-size: 14px; gap: 8px;">
+        <div class="repo-breadcrumb">
             <i class="fas fa-folder" style="color: var(--color-fg-muted);"></i>
             <a href="{{ url_for('view_tree', repo_name=repo_name, ref=ref) }}" style="color: #ffffff;">{{
                 repo_name }}</a>
@@ -75,15 +75,15 @@
             {% endif %}
         </div>
     </div>
-    <div style="display: flex; gap: 8px; position: relative;">
-        <!-- Code Button Dropdown -->
+    <div class="repo-toolbar-right">
+        
         <div style="position: relative;">
             <button class="btn btn-sm btn-primary" style="font-weight: 600;" onclick="toggleCodeDropdown()">
                 代码 <i class="fas fa-caret-down"></i>
             </button>
 
             <div id="code-dropdown"
-                style="display: none; position: absolute; top: 100%; right: 0; margin-top: 4px; background: var(--color-canvas-default); border: 1px solid var(--color-border-default); border-radius: 6px; width: 350px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                style="display: none; position: absolute; top: 100%; right: 0; margin-top: 4px; background: var(--color-canvas-default); border: 1px solid var(--color-border-default); border-radius: 6px; width: 350px; max-width: 90vw; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
                 <div style="padding: 0;">
                     <div
                         style="padding: 8px 16px; border-bottom: 1px solid var(--color-border-default); font-weight: 600;">
@@ -170,7 +170,7 @@
         }
     }
 
-    // Close dropdowns when clicking outside
+    
     document.addEventListener('click', function (event) {
         const branchDropdown = document.getElementById('branch-dropdown');
         const branchButton = document.querySelector('button[onclick="toggleBranchDropdown()"]');
@@ -259,7 +259,7 @@
                 {% endif %}
             </div>
             <div class="file-info">
-                <div class="file-name" style="flex: 0 0 250px;">
+                <div class="file-name">
                     {% if item.is_dir %}
                     <a href="{{ url_for('view_tree', repo_name=repo_name, ref=ref, subpath=item.path) }}">{{ item.name
                         }}</a>
@@ -268,11 +268,10 @@
                         }}</a>
                     {% endif %}
                 </div>
-                <div
-                    style="flex: 1; color: var(--color-fg-muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 16px;">
+                <div class="file-commit-message">
                     {{ item.commit_message if item.commit_message else '无提交信息' }}
                 </div>
-                <div class="file-meta" style="width: 200px; text-align: right; font-size: 12px;">
+                <div class="file-meta">
                     {{ item.commit_time if item.commit_time else '' }}
                 </div>
             </div>
@@ -288,7 +287,7 @@
     </div>
     {% if readme_is_markdown %}
     <div class="markdown-body" id="readme-content" style="border: none; padding: 16px;">
-        <!-- Markdown will be rendered here -->
+        
     </div>
     <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
     <script>
@@ -311,7 +310,7 @@
         const ref = {{ ref| tojson }};
         const currentPath = {{ current_path| tojson }};
 
-        // Utility to escape HTML
+        
         function escapeHtml(text) {
             return text
                 .replace(/&/g, "&amp;")
@@ -321,18 +320,18 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // 1. Extract and protect math content
+        
         const mathExpressions = [];
 
         function extractMath(text) {
-            // Replace Block Math $$...$$
+            
             text = text.replace(/\$\$([\s\S]*?)\$\$/g, function (match) {
                 const id = mathExpressions.length;
                 mathExpressions.push(match);
                 return ' MATHBLOCKPLACEHOLDER' + id + ' ';
             });
 
-            // Replace Inline Math $...$
+            
             text = text.replace(/\$((?:[^$\\]|\\.)+)\$/g, function (match) {
                 const id = mathExpressions.length;
                 mathExpressions.push(match);
@@ -348,7 +347,7 @@
             });
         }
 
-        // 2. Process Markdown
+        
         let finalHtml = '';
         if (typeof marked !== 'undefined') {
             try {
@@ -364,11 +363,11 @@
             finalHtml = '<pre>' + escapeHtml(readmeText) + '</pre>';
         }
 
-        // 3. Render to DOM
+        
         const contentDiv = document.getElementById('readme-content');
         contentDiv.innerHTML = finalHtml;
 
-        // 4. Fix Images and Links (Execute BEFORE MathJax)
+        
         function resolveRelativePath(relativePath) {
             if (relativePath.startsWith('http://') ||
                 relativePath.startsWith('https://') ||
@@ -390,7 +389,7 @@
             return basePath.join('/');
         }
 
-        // Fix Images
+        
         const images = document.querySelectorAll('#readme-content img');
         images.forEach(img => {
             const src = img.getAttribute('src');
@@ -400,7 +399,7 @@
             }
         });
 
-        // Fix Links
+        
         const links = document.querySelectorAll('#readme-content a');
         links.forEach(link => {
             const href = link.getAttribute('href');
@@ -417,7 +416,7 @@
             }
         });
 
-        // 5. Trigger MathJax (Safely)
+        
         if (window.MathJax && window.MathJax.typesetPromise) {
             MathJax.typesetPromise([contentDiv]).catch((err) => console.log('MathJax error:', err));
         }

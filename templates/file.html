@@ -3,31 +3,31 @@
 {% block title %}{{ filepath }}{% endblock %}
 
 {% block content %}
-<div style="font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+<div class="file-breadcrumb-container">
     <i class="fas fa-folder" style="color: var(--color-fg-muted);"></i>
-    <a href="{{ url_for('view_tree', repo_name=repo_name, ref=ref) }}" style="color: #ffffff; font-weight: 600;">{{
+    <a href="{{ url_for('view_tree', repo_name=repo_name, ref=ref) }}" class="breadcrumb-root">{{
         repo_name }}</a>
-    <span style="color: var(--color-fg-muted);">/</span>
+    <span class="breadcrumb-separator">/</span>
     {% set parts = filepath.split('/') %}
     {% set ns = namespace(path='') %}
     {% for part in parts[:-1] %}
     {% set ns.path = ns.path + part + '/' %}
     <a href="{{ url_for('view_tree', repo_name=repo_name, ref=ref, subpath=ns.path.rstrip('/')) }}"
-        style="color: #ffffff; font-weight: 600;">{{ part }}</a>
-    <span style="color: var(--color-fg-muted);">/</span>
+        class="breadcrumb-item">{{ part }}</a>
+    <span class="breadcrumb-separator">/</span>
     {% endfor %}
-    <span style="font-weight: 600; color: var(--color-fg-default);">{{ parts[-1] }}</span>
+    <span class="breadcrumb-leaf">{{ parts[-1] }}</span>
 </div>
 
 <div class="Box">
-    <div class="Box-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-size: 13px; font-weight: 600;">
-            <i class="far fa-file-code" style="margin-right: 8px;"></i>{{ filepath.split('/')[-1] }}
-            <span style="font-weight: 400; color: var(--color-fg-muted); margin-left: 8px;">({{ display_ref }})</span>
+    <div class="Box-header file-view-header">
+        <div class="file-view-info">
+            <i class="far fa-file-code"></i>
+            <span>{{ filepath.split('/')[-1] }}</span>
+            <span class="file-ref-label">({{ display_ref }})</span>
         </div>
-        <div style="display: flex; gap: 8px;">
-            <div class="file-meta"
-                style="font-size: 12px; color: var(--color-fg-muted); display: flex; align-items: center;">
+        <div class="file-view-actions">
+            <div class="file-meta">
                 {% if file_size %}
                 <span>{{ file_size }}</span>
                 {% endif %}
@@ -59,7 +59,7 @@
     </div>
     {% elif is_markdown %}
     <div class="markdown-body" id="markdown-content" style="border: none; padding: 32px; border-radius: 0;">
-        <!-- Markdown will be rendered here -->
+        
     </div>
     <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
     <script>
@@ -82,7 +82,7 @@
         const gitRef = {{ ref| tojson }};
         const currentFilepath = {{ filepath| tojson }};
 
-        // Utility to escape HTML
+        
         function escapeHtml(text) {
             return text
                 .replace(/&/g, "&amp;")
@@ -92,18 +92,18 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // 1. Extract and protect math content
+        
         const mathExpressions = [];
 
         function extractMath(text) {
-            // Replace Block Math $$...$$
+            
             text = text.replace(/\$\$([\s\S]*?)\$\$/g, function (match) {
                 const id = mathExpressions.length;
                 mathExpressions.push(match);
                 return ' MATHBLOCKPLACEHOLDER' + id + ' ';
             });
 
-            // Replace Inline Math $...$
+            
             text = text.replace(/\$((?:[^$\\]|\\.)+)\$/g, function (match) {
                 const id = mathExpressions.length;
                 mathExpressions.push(match);
@@ -119,7 +119,7 @@
             });
         }
 
-        // 2. Process Markdown
+        
         let finalHtml = '';
         if (typeof marked !== 'undefined') {
             try {
@@ -135,11 +135,11 @@
             finalHtml = '<pre>' + escapeHtml(markdownText) + '</pre>';
         }
 
-        // 3. Render to DOM
+        
         const contentDiv = document.getElementById('markdown-content');
         contentDiv.innerHTML = finalHtml;
 
-        // 4. Fix Images and Links (Execute BEFORE MathJax to ensure relative paths are fixed)
+        
         const currentDir = currentFilepath.split('/').slice(0, -1).join('/');
 
         function resolveRelativePath(relativePath) {
@@ -163,7 +163,7 @@
             return basePath.join('/');
         }
 
-        // Fix Images
+        
         const images = document.querySelectorAll('#markdown-content img');
         images.forEach(img => {
             const src = img.getAttribute('src');
@@ -173,7 +173,7 @@
             }
         });
 
-        // Fix Links
+        
         const links = document.querySelectorAll('#markdown-content a');
         links.forEach(link => {
             const href = link.getAttribute('href');
@@ -190,7 +190,7 @@
             }
         });
 
-        // 5. Trigger MathJax (Safely)
+        
         if (window.MathJax && window.MathJax.typesetPromise) {
             MathJax.typesetPromise([contentDiv]).catch((err) => console.log('MathJax error:', err));
         }

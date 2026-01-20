@@ -21,14 +21,14 @@
 
         .flash-error {
             background-color: rgba(248, 81, 73, 0.1);
-            /* Red */
+            
             border-color: rgba(248, 81, 73, 0.4);
             color: #ff7b72;
         }
 
         .flash-success {
             background-color: rgba(63, 185, 80, 0.1);
-            /* Green */
+            
             border-color: rgba(63, 185, 80, 0.4);
             color: #56d364;
         }
@@ -36,18 +36,24 @@
 </head>
 
 <body>
-    <header>
-        <a href="{{ url_for('index') }}" class="header-logo" style="text-decoration: none; cursor: pointer;">
-            <img src="{{ url_for('static', filename='img/Logo.jpg') }}" width="32" height="32"
-                style="border-radius: 50%; vertical-align: middle;">
-        </a>
-        <form action="{{ url_for('search') }}" method="GET" style="flex: 1; max-width: 400px;">
-            <input type="text" name="q" class="header-search" placeholder="搜索项目、开发者或代码..."
-                value="{{ request.args.get('q', '') }}">
-        </form>
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
+    <header class="site-header">
+        <div class="header-left">
+            <a href="{{ url_for('index') }}" class="header-logo" style="text-decoration: none; cursor: pointer;">
+                <img src="{{ url_for('static', filename='img/Logo.jpg') }}" width="32" height="32"
+                    style="border-radius: 50%; vertical-align: middle;">
+            </a>
+        </div>
+
+        <div class="header-center">
+            <form action="{{ url_for('search') }}" method="GET" class="header-search-form">
+                <input type="text" name="q" class="header-search" placeholder="搜索项目、开发者或代码..."
+                    value="{{ request.args.get('q', '') }}">
+            </form>
+        </div>
+
+        <div class="header-right">
             {% if session.get('authenticated') %}
-            <a href="{{ url_for('logout') }}" style="color: var(--color-header-text); font-size: 13px;">
+            <a href="{{ url_for('logout') }}" class="header-link">
                 <i class="fas fa-sign-out-alt"></i> 登出
             </a>
             {% endif %}
@@ -55,21 +61,20 @@
     </header>
 
     {% if repo_name %}
-    <div style="background-color: var(--color-canvas-subtle); border-bottom: 1px solid var(--color-border-default);">
+    <div class="repo-header-container">
         <div class="container" style="padding-bottom: 0;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                <h1 style="font-size: 20px; font-weight: 400; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <div class="repo-title-row">
+                <h1 class="repo-title">
                     <i class="fas fa-book" style="color: var(--color-fg-muted); font-size: 16px;"></i>
                     <a href="/" style="color: #ffffff;">Olsc</a>
                     <span style="color: var(--color-fg-muted);">/</span>
                     <a href="{{ url_for('view_repo', repo_name=repo_name) }}"
                         style="color: #ffffff; font-weight: 600;">{{ repo_name }}</a>
-                    <span
-                        style="border: 1px solid var(--color-border-default); border-radius: 20px; padding: 0 7px; font-size: 12px; color: var(--color-fg-muted);">公开</span>
+                    <span class="label-public">公开</span>
                 </h1>
             </div>
 
-            <nav class="UnderlineNav" style="border-bottom: none; margin-top: 0;">
+            <nav class="UnderlineNav">
                 <a href="{{ url_for('view_repo', repo_name=repo_name) }}"
                     class="UnderlineNav-item {% if request.endpoint == 'view_repo' and not 'commits' in request.path %}selected{% endif %}">
                     <i class="fas fa-code"></i> 代码
@@ -123,7 +128,7 @@
     </footer>
 
     <script>
-        // Common JS helper for actions
+        
         async function gitAction(repoName, action, payload = {}) {
             let actionName = action;
             if (action === 'pull') actionName = '拉取';
