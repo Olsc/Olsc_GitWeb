@@ -1112,8 +1112,34 @@ def download_zip(repo_name, ref):
         flash(f'下载失败: {str(e)}', 'error')
         return redirect(url_for('view_repo', repo_name=clean_name))
 
-
-
+@app.route('/upload_temp_asset', methods=['POST'])
+@require_auth
+def upload_temp_asset():
+    """上传临时文件资产 (用于带进度条的异步上传)"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
+    if file:
+        filename = secure_filename(file.filename)
+        # 生成唯一前缀以避免冲突
+        timestamp = int(datetime.datetime.now().timestamp() * 1000)
+        saved_filename = f"{timestamp}_{filename}"
+        
+        temp_dir = os.path.join(DATA_DIR, 'temp_uploads')
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+            
+        file.save(os.path.join(temp_dir, saved_filename))
+        
+        return jsonify({
+            'success': True,
+            'temp_key': saved_filename,
+            'original_name': filename
+        })
+    return jsonify({'error': 'Unknown error'}), 500
 
 @app.route('/<repo_name>/releases')
 def view_releases(repo_name):
@@ -1160,9 +1186,40 @@ def new_release(repo_name):
         # 创建数据库记录
         release_id = db.create_release(clean_name, tag_name, target_commitish, name, body, is_prerelease=is_prerelease)
         
-        # 处理文件上传
-        files = request.files.getlist('assets')
+        # 确定发布目录
         upload_dir = os.path.join(DATA_DIR, clean_name, 'releases', str(release_id))
+        
+        # 1. 处理异步上传的临时文件
+        temp_keys = request.form.getlist('uploaded_file_keys')
+        if temp_keys:
+            if not os.path.exists(upload_dir):
+                os.makedirs(upload_dir)
+            
+            temp_dir = os.path.join(DATA_DIR, 'temp_uploads')
+            
+            for key in temp_keys:
+                safe_key = secure_filename(key)
+                src_path = os.path.join(temp_dir, safe_key)
+                
+                if os.path.exists(src_path):
+                    # 尝试从 temp_key (timestamp_filename) 中恢复原始文件名
+                    parts = safe_key.split('_', 1)
+                    final_filename = parts[1] if len(parts) > 1 else safe_key
+                    
+                    dest_path = os.path.join(upload_dir, final_filename)
+                    
+                    # 移动文件
+                    shutil.move(src_path, dest_path)
+                    
+                    # 获取信息并保存到 DB
+                    size = os.path.getsize(dest_path)
+                    mimetype, _ = mimetypes.guess_type(dest_path)
+                    if not mimetype: mimetype = 'application/octet-stream'
+                    
+                    db.add_release_asset(release_id, final_filename, mimetype, size, dest_path)
+
+        # 2. 处理传统的表单文件上传 (作为没用 JS 时的后备，或混合使用)
+        files = request.files.getlist('assets')
         if files:
             if not os.path.exists(upload_dir):
                 os.makedirs(upload_dir)
@@ -1266,8 +1323,6 @@ if __name__ == '__main__':
     
     local_ips = get_local_ips()
     
-    print("=" * 70)
-    print("🚀 类 GitHub Web 管理器已启动")
     print("=" * 70)
     print(f"\n📍 本地访问地址:")
     print(f"   http://localhost:{PORT}")
